@@ -1,0 +1,134 @@
+<html>
+<head>
+<meta charset="utf-8">
+<title>Taipei OD Table - Demo </title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.0/dist/leaflet.css" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+<style>
+#map { height: 500px; }
+</style>
+	<script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script>
+
+
+<script src="https://unpkg.com/leaflet@1.0.0/dist/leaflet.js"></script>
+<script src="leaflet.curve.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<!-- <script src="https://d3js.org/d3-selection.v1.min.js"></script> -->
+
+<!-- Load c3.css -->
+<link href="/css/c3.min.css" rel="stylesheet">
+<link href="/css/main.css" rel="stylesheet">
+
+<!-- Load d3.js and c3.js -->
+<script src="/js/c3.min.js"></script>
+
+<script src="/js/preProcess.js"></script>
+</head>
+<body>
+<div class="container-fluid">
+  <div class="row">
+	<div class="col-xs-12 col-md-12 col-lg-12" id="map"></div>
+  </div>
+  <div class="row">
+  	<div class="col-xs-12 col-md-12 col-lg-12 vcenter" id="d3">
+		<div id="chart" class="barChartClass" >請選擇一個行政區</div>
+	</div>
+  </div>
+</div>
+
+
+
+<script>
+
+var map = L.map('map').setView([25.03241, 121.523208], 11);
+var mapZoomLevel = map.getZoom();
+L.tileLayer('http://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',apikey:'c4377a218be242ddb3297260d216b11b'}).addTo(map);
+
+// read csv data 
+
+var newLineArray = [],
+  	newMarkerArray = [],
+  	barChartData = [],
+  	chartSeries = [],
+  	ODTableData = [],
+  	tempArrayData = [],
+	nodeNameXY = [],
+  	nodeNameArray = [],
+  	temp_ODTable = [],
+  	tempTotal_Node= [];
+
+var colorBlackSet = ['#D3D3D3','#C0C0C0','#A9A9A9','#778899','#708090','#808080','#696969','#000000'];
+var colorGreenSet = ['#ADFF2F','#7CFC00','#7FFF00','#00FF00','#32CD32','#9ACD32','#8FBC8F','#3CB371','#66CDAA','#20B2AA','#008080','#2E8B57','#228B22','#006400','#808000','#556B2F','#2F4F4F'];
+var colorHeatMapSet = ['#F1F8E9','#DCEDC8','#C5E1A5','#AED581','#FFF59D','#FFF176','#FFEE58','#FF8A65','#FF7043','#FF5722'];
+var colorHeatMapSet2 = ['#AED581','#9CCC65','#8BC33A','#7CB342','#FFEB3B','#FDD835','#FBC02D','#FF8A65','#FF7043','#FF5722'];
+var colorBrown = ['#AAAAAA','#AAAAAA','#AAAAAA','#AAAAAA','#AAAAAA','#AAAAAA','#AAAAAA'];
+
+d3.csv("./data.csv", function(data) {
+	tempArrayData=data;
+	var LBD = LoadCSVData(tempArrayData,colorHeatMapSet2);
+    barChartData=processOD(LBD.temp_OD);
+    barChartData[""]={};
+    newMarkerArray = processMarker(LBD.nodeNameArray,LBD.nodeNameXY,LBD.enter_Number,LBD.exit_Number);
+    initLine(LBD.newLineArray , map);
+    initMarker(newMarkerArray , map);
+});
+
+
+// function markerClick(e){
+//   console.log(e.target.options.title);
+//   LBD.newLineArray.map((_line)=>{
+//     HightLineFunc(_line).addTo(_map);
+//   });
+// }
+
+
+// console.log(temp_aaaa);
+
+// var circleMarkerSet = [];
+
+
+// marker1 = drawCircleMarker(25.0361,121.5137,5,'#00ff00','this is AA').addTo(map);
+// circleMarkerSet.push(marker1);
+// marker2 = drawCircleMarker(25.0156,121.5460,1,'#ff0000','this is BB').addTo(map);
+// circleMarkerSet.push(marker2);
+
+
+
+// L.marker([25.0361,121.5137],{title:'AA'}).addTo(map);
+// var marker = L.marker([25.0156,121.5460],{title:'BB'}).addTo(map);
+
+
+
+// var pathMK2 = L.curve(['M',[25.0156,121.5460],
+// 					   'S',[25.0156,121.5137],
+// 					       [25.0361,121.5137]],{color:'#000',weight:4}).addTo(map);
+
+// marker.bindTooltip('it is BB').openTooltip();
+// cL.bindTooltip('it is CC').openTooltip();
+
+
+function onMapClick(e) {
+    console.log(e.latlng);
+}
+
+function changeMarkerByZoom(zoomLevel){
+
+}
+// map.on('click', onMapClick);
+// map.on('zoomend', function(){
+// 	preZoomLevel = mapZoomLevel
+// 	mapZoomLevel = map.getZoom();
+// 	// console.log('change zoom level : '+mapZoomLevel);
+// 	for (var i = 0 ; i< circleMarkerSet.length ; i++){
+// 		_val = circleMarkerSet[i].getRadius()/preZoomLevel;
+// 		circleMarkerSet[i].setRadius(_val * mapZoomLevel);
+// 		// console.log(_val)
+// 	}
+// });
+</script>
+
+</body>
+</html>

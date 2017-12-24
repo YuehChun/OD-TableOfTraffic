@@ -1,0 +1,13 @@
+.popupMap{
+	font-size:20px;
+}
+.vcenter{
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
+.barChartClass{
+    text-align:center;
+    font-size:30px;
+    /*margin:100px;*/
+}
