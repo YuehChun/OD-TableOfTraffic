@@ -1,3 +1,10 @@
+
+.mapRow{
+	height: 500px;
+}
+#map { 
+	height: 500px;
+}
 .popupMap{
 	font-size:20px;
 }
