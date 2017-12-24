@@ -8,7 +8,7 @@
    integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
    crossorigin=""/>
 
- <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.2.0/leaflet.js"
+ <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
    integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
    crossorigin=""></script>
 <script src="js/leaflet.curve.js"></script>
@@ -45,7 +45,7 @@
 
 var map = L.map('map').setView([25.03241, 121.523208], 11);
 var mapZoomLevel = map.getZoom();
-L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',apikey:'c4377a218be242ddb3297260d216b11b'}).addTo(map);
+L.tileLayer('http://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',apikey:'c4377a218be242ddb3297260d216b11b'}).addTo(map);
 
 // read csv data 
 
@@ -56,7 +56,7 @@ var newLineArray = [],
   	ODTableData = [],
   	tempArrayData = [],
 	nodeNameXY = [],
-  	nodeNameArray = [],	
+  	nodeNameArray = [],
   	temp_ODTable = [],
   	tempTotal_Node= [];
 
