@@ -146,7 +146,7 @@ function processOD(temp_OD){
 }
 
 function initGaugeChart(){
-  var rateContents = ["<div class='rateChart'>進入量比</div>",
+  var rateContents = ["<div id='rateChartTitle' class='rateChart'>Entrance Rate</div>",
                       "<div id='rateChart'></div>"].join('');
 
   var dialog = L.control.dialog()
@@ -164,21 +164,15 @@ function initGaugeChart(){
             ['data', 50.0]
         ],
         type: 'gauge',
-        // onclick: function (d, i) { console.log("onclick", d, i); },
-        // onmouseover: function (d, i) { console.log("onmouseover", d, i); },
-        // onmouseout: function (d, i) { console.log("onmouseout", d, i); }
     },
     gauge: {
        label: {
            format: function(value, ratio) {
                return value;
            },
-           // show: false // to turn off the min/max labels.
        },
-//    min: 0, // 0 is default, //can handle negative min e.g. vacuum / voltage / current flow / rate of change
-//    max: 100, // 100 is default
    units: '%',
-   width: 50 // for adjusting arc thickness
+   width: 50
     },
     color: {
         pattern: ['#FF0000', '#F97600', '#F6C600', '#60B044'], // the three color levels for the percentage values.
@@ -194,8 +188,10 @@ function initGaugeChart(){
 
 function ChangeGaugeChart(_Marker){
   if(_Marker['noName']==hiLightTitle){
+    d3.select('#rateChartTitle').html(" [ "+_Marker['noName']+" ] Entrance Rate");
     var _rate = (_Marker['enter']/_Marker['total']*100).toFixed(1);
   }else{
+    d3.select('#rateChartTitle').html("Entrance Rate");
     var _rate = 50.0;
   }
   RateChart.load({
@@ -240,9 +236,7 @@ function callC3Chart(title){
 
     });
   }else{
-    console.log("123");
     d3.select('#chart').html("請選擇一個行政區");
-    // $("#chart")
   }
 }
 
