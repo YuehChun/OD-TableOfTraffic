@@ -2,6 +2,7 @@
 <head>
 <meta charset="utf-8">
 <title>Taipei OD Table - Demo </title>
+<script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script>
 <link rel="stylesheet" href="css/leaflet.css" />
 <link rel="stylesheet" href="css/bootstrap.min.css" >
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
@@ -16,11 +17,14 @@
 <script src="js/popper.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
 <script src="js/d3.v3.min.js"></script>
+<script src="js/Leaflet.Dialog.js"></script>
 <!-- <script src="https://d3js.org/d3-selection.v1.min.js"></script> -->
 
 <!-- Load c3.css -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 <link href="css/c3.min.css" rel="stylesheet">
 <link href="css/main.css" rel="stylesheet">
+<link href="css/Leaflet.Dialog.css" rel="stylesheet">
 
 <!-- Load d3.js and c3.js -->
 <script src="js/c3.min.js"></script>
@@ -42,6 +46,7 @@
 
 
 <script>
+
 
 var map = L.map('map').setView([25.03241, 121.523208], 11);
 var mapZoomLevel = map.getZoom();
@@ -74,40 +79,45 @@ d3.csv("./data.csv", function(data) {
     newMarkerArray = processMarker(LBD.nodeNameArray,LBD.nodeNameXY,LBD.enter_Number,LBD.exit_Number);
     initLine(LBD.newLineArray , map);
     initMarker(newMarkerArray , map);
+    initGaugeChart(map);
 });
 
 
-// function markerClick(e){
-//   console.log(e.target.options.title);
-//   LBD.newLineArray.map((_line)=>{
-//     HightLineFunc(_line).addTo(_map);
-//   });
-// }
-
-
-// console.log(temp_aaaa);
-
-// var circleMarkerSet = [];
-
-
-// marker1 = drawCircleMarker(25.0361,121.5137,5,'#00ff00','this is AA').addTo(map);
-// circleMarkerSet.push(marker1);
-// marker2 = drawCircleMarker(25.0156,121.5460,1,'#ff0000','this is BB').addTo(map);
-// circleMarkerSet.push(marker2);
+    var contents = [
+                    "<div id='rateChart' class='rateChart'>Hello! Welcome to your nice new dialog box!</div>",
+                    "<button class='btn btn-primary' onclick='callChange()'>AAAAAAA</button><br/><br/>",
+                    "<button class='btn btn-primary' onclick='dialog.setSize([ 350, 350 ])'>dialog.setSize([ 350, 350 ])</button><br/><br/>",
+                    "<button class='btn btn-primary' onclick='dialog.setLocation([ 50, 50 ])'>dialog.setLocation([ 50, 50 ])</button><br/><br/>",
+                    "<button class='btn btn-danger' onclick='dialog.freeze()'>dialog.freeze()</button>&nbsp;&nbsp;",
+                    "<button class='btn btn-success' onclick='dialog.unfreeze()'>dialog.unfreeze()</button><br/><br/>",
+                    "<button class='btn btn-danger' onclick='dialog.hideClose()'>dialog.hideClose()</button>",
+                    "<button class='btn btn-success' onclick='dialog.showClose()'>dialog.showClose()</button><br/><br/>",
+                    "<button class='btn btn-danger' onclick='dialog.hideResize()'>dialog.hideResize()</button>",
+                    "<button class='btn btn-success' onclick='dialog.showResize()'>dialog.showResize()</button><br/><br/>"
+                    ].join('');
 
 
 
-// L.marker([25.0361,121.5137],{title:'AA'}).addTo(map);
-// var marker = L.marker([25.0156,121.5460],{title:'BB'}).addTo(map);
 
 
-
-// var pathMK2 = L.curve(['M',[25.0156,121.5460],
-// 					   'S',[25.0156,121.5137],
-// 					       [25.0361,121.5137]],{color:'#000',weight:4}).addTo(map);
-
-// marker.bindTooltip('it is BB').openTooltip();
-// cL.bindTooltip('it is CC').openTooltip();
+    // map.on('dialog:opened', function(e){ console.log("dialog opened event fired."); });
+    // map.on('dialog:closed', function(e){ console.log("dialog closed event fired."); });
+    // map.on('dialog:destroyed', function(e){ console.log("dialog destroyed event fired."); });
+    // map.on('dialog:locked', function(e){ console.log("dialog locked event fired."); });
+    // map.on('dialog:unlocked', function(e){ console.log("dialog unlocked event fired."); });
+    // map.on('dialog:frozen', function(e){ console.log("dialog frozen event fired."); });
+    // map.on('dialog:unfrozen', function(e){ console.log("dialog unfrozen event fired."); });
+    // map.on('dialog:updated', function(e){ console.log("dialog updated event fired."); });
+    // map.on('dialog:resizestart', function(e){ console.log("dialog resizestart event fired."); });
+    // map.on('dialog:resizing', function(e){ console.log("dialog resizing event fired."); });
+    // map.on('dialog:resizeend', function(e){ console.log("dialog resizeend event fired."); });
+    // map.on('dialog:movestart', function(e){ console.log("dialog movestart event fired."); });
+    // map.on('dialog:moving', function(e){ console.log("dialog moving event fired."); });
+    // map.on('dialog:moveend', function(e){ console.log("dialog moveend event fired."); });
+    // map.on('dialog:closehidden', function(e){ console.log("dialog closehidden event fired."); });
+    // map.on('dialog:closeshown', function(e){ console.log("dialog closeshown event fired."); });
+    // map.on('dialog:resizehidden', function(e){ console.log("dialog resizehidden event fired."); });
+    // map.on('dialog:resizeshown', function(e){ console.log("dialog resizeshown event fired."); });
 
 
 function onMapClick(e) {

@@ -4,7 +4,8 @@ var hiLineArray = [],
     hiLightTitle = "",
     hiLightMarker = "",
     L_data=[],
-    M_data=[];
+    M_data=[],
+    RateChart=[];
 
 
 function LoadCSVData(tempArrayData , color4LineSet){
@@ -144,12 +145,68 @@ function processOD(temp_OD){
   return barChartData;
 }
 
+function initGaugeChart(){
+  var rateContents = ["<div class='rateChart'>進入量比</div>",
+                      "<div id='rateChart'></div>"].join('');
+
+  var dialog = L.control.dialog()
+            .setContent(rateContents)
+            .addTo(map);
+
+  dialog.setLocation([10,1130]);
+  dialog.freeze();
+  dialog.setSize([ 280, 180]);
+  dialog.hideClose();
+  RateChart = c3.generate({
+    bindto: '#rateChart',
+    data: {
+        columns: [
+            ['data', 50.0]
+        ],
+        type: 'gauge',
+        // onclick: function (d, i) { console.log("onclick", d, i); },
+        // onmouseover: function (d, i) { console.log("onmouseover", d, i); },
+        // onmouseout: function (d, i) { console.log("onmouseout", d, i); }
+    },
+    gauge: {
+       label: {
+           format: function(value, ratio) {
+               return value;
+           },
+           // show: false // to turn off the min/max labels.
+       },
+//    min: 0, // 0 is default, //can handle negative min e.g. vacuum / voltage / current flow / rate of change
+//    max: 100, // 100 is default
+   units: '%',
+   width: 50 // for adjusting arc thickness
+    },
+    color: {
+        pattern: ['#FF0000', '#F97600', '#F6C600', '#60B044'], // the three color levels for the percentage values.
+        threshold: {
+            values: [30, 60, 90, 100]
+        }
+    },
+    size: {
+        height: 120,
+    }
+});
+}
+
+function ChangeGaugeChart(_Marker){
+  if(_Marker['noName']==hiLightTitle){
+    var _rate = (_Marker['enter']/_Marker['total']*100).toFixed(1);
+  }else{
+    var _rate = 50.0;
+  }
+  RateChart.load({
+        columns: [['data', _rate]]
+  });
+}
 
 function callC3Chart(title){
   var x = [];
   var enter = ["enter"];
   var exit = ["exit"];
-  console.log(hiLightTitle);
   if(hiLightTitle!=""){
     barChartData[hiLightTitle].map((_data)=>{
       x.push(_data['zone']);
@@ -268,21 +325,25 @@ function MarkerHiLightProcess(_marker){
 
 function HiLightFunc(_map,  title){
   LineHiLightProcess(_map, title);
-  MarkerHiLightProcee(_map , title);
+  var HiMarker = MarkerHiLightProcee(_map , title);
   callC3Chart(title);
+  ChangeGaugeChart(HiMarker);
 }
 
 function MarkerHiLightProcee(_map , title){
   if(hiLightMarker!=""){
     hiLightMarker.remove();
   }
+  var HiMarker = [];
   M_data.map((_marker)=>{
     if(_marker['noName']==title && hiLightTitle==title){
       var _LM = MarkerHiLightProcess(_marker);
       _LM.addTo(_map).on('click' ,L.bind(HiLightFunc, null, _map , _marker['noName']));
       hiLightMarker = _LM;
+      HiMarker=_marker
     }
   });
+  return HiMarker;
 }
 
 function initMarker(markerArray , _map){
