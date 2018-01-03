@@ -270,7 +270,7 @@ function initGaugeChart(map){
             .setContent(rateContents)
             .addTo(map);
 
-  dialog.setLocation([10,1130]);
+  dialog.setLocation([290, 5]);
   dialog.freeze();
   dialog.setSize([ 280, 180]);
   dialog.hideClose();
