@@ -4,7 +4,7 @@
 <title>Taipei OD Table - Demo </title>
 <script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script>
 <link rel="stylesheet" href="css/leaflet.css" />
-<link rel="stylesheet" href="css/bootstrap.min.css" >
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
    integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
    crossorigin=""/>
@@ -30,11 +30,19 @@
 <script src="js/c3.min.js"></script>
 
 <script src="js/preProcess.js"></script>
+<script src="js/upload.js"></script>
 </head>
 <body>
 <div class="container-fluid">
   <div class="row">
-	<div class="col-xs-12 col-md-12 col-lg-12" id="map"></div>
+   <div class="col-xs-4 col-md-4 col-lg-4" >
+     <input type="file" id="uploader" class="form-control-file" >
+   </div>
+   <div class="col-xs-8 col-md-8 col-lg-8" id="mainType">
+   </div>
+  </div>
+  <div class="row">
+	 <div class="col-xs-12 col-md-12 col-lg-12" id="map"></div>
   </div>
   <div class="row">
   	<div class="col-xs-12 col-md-12 col-lg-12 vcenter" id="d3">
@@ -47,6 +55,7 @@
 
 <script>
 
+upload_button("uploader", load_dataset);
 
 var map = L.map('map').setView([25.03241, 121.523208], 11);
 var mapZoomLevel = map.getZoom();
@@ -54,16 +63,6 @@ L.tileLayer('http://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png', {
 
 // read csv data 
 
-var newLineArray = [],
-  	newMarkerArray = [],
-  	barChartData = [],
-  	chartSeries = [],
-  	ODTableData = [],
-  	tempArrayData = [],
-    nodeNameXY = [],
-  	nodeNameArray = [],
-  	temp_ODTable = [],
-  	tempTotal_Node= [];
 
 var colorBlackSet = ['#D3D3D3','#C0C0C0','#A9A9A9','#778899','#708090','#808080','#696969','#000000'];
 var colorGreenSet = ['#ADFF2F','#7CFC00','#7FFF00','#00FF00','#32CD32','#9ACD32','#8FBC8F','#3CB371','#66CDAA','#20B2AA','#008080','#2E8B57','#228B22','#006400','#808000','#556B2F','#2F4F4F'];
@@ -72,14 +71,14 @@ var colorHeatMapSet2 = ['#AED581','#9CCC65','#8BC33A','#7CB342','#FFEB3B','#FDD8
 var colorBrown = ['#AAAAAA','#AAAAAA','#AAAAAA','#AAAAAA','#AAAAAA','#AAAAAA','#AAAAAA'];
 
 d3.csv("./data.csv", function(data) {
-	tempArrayData=data;
-	var LBD = LoadCSVData(tempArrayData,colorHeatMapSet2);
-    barChartData=processOD(LBD.temp_OD);
-    barChartData[""]={};
-    newMarkerArray = processMarker(LBD.nodeNameArray,LBD.nodeNameXY,LBD.enter_Number,LBD.exit_Number);
-    initLine(LBD.newLineArray , map);
-    initMarker(newMarkerArray , map);
-    initGaugeChart(map);
+  tempArrayData=data;
+  var csvKey = Object.keys(tempArrayData[0]);
+  if(csvKey.includes('x1') && csvKey.includes('y1') && csvKey.includes('x2') && csvKey.includes('y2') && csvKey.includes('o') && csvKey.includes('d') && csvKey.includes('cnt')){
+    var index_diff = arr_diff(csvKey,['x1','y1','x2','y2','o','d','cnt']);
+    preLoadProcess(index_diff);
+  }else{
+    alert("Error data!!");
+  }
 });
 
 </script>

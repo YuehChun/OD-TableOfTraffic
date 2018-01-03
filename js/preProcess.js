@@ -1,4 +1,14 @@
 
+var newLineArray = [],
+    newMarkerArray = [],
+    barChartData = [],
+    chartSeries = [],
+    ODTableData = [],
+    tempArrayData = [],
+    nodeNameXY = [],
+    nodeNameArray = [],
+    temp_ODTable = [],
+    tempTotal_Node= [];
 
 var hiLineArray = [],
     hiLightTitle = "",
@@ -7,8 +17,117 @@ var hiLineArray = [],
     M_data=[],
     RateChart=[];
 
+var Leaflet_Line = [],
+    Leaflet_Marker = [];
 
-function LoadCSVData(tempArrayData , color4LineSet){
+var indexDiff=[],
+    loadIndexArr=[],
+    loadDataIndex=[];
+
+function resetAllSetting(){
+  hiLightTitle = "";
+  d3.select('#rateChartTitle').html("Entrance Rate");
+  newLineArray = [];
+  newMarkerArray = [];
+  barChartData = [];
+  chartSeries = [];
+  ODTableData = [];
+  nodeNameXY = [];
+  nodeNameArray = [];
+  temp_ODTable = [];
+  tempTotal_Node= [];
+  removeAllMapElement();
+  RateChart.load({
+        columns: [['data', 50.0]]
+  });
+}
+
+function removeAllMapElement(){
+  Leaflet_Line.map((_LC)=>{
+    _LC.remove();
+  });
+  Leaflet_Marker.map((_LM)=>{
+    _LM.remove();
+  });
+  hiLineArray.map((_HL)=>{
+    _HL.remove();
+  });
+  if(hiLightMarker!=""){
+    hiLightMarker.remove();
+  }
+}
+
+function callFilterData(selectorID){
+  var sel = document.getElementById(selectorID);
+  var _val = sel.options[sel.selectedIndex].value;
+  loadDataIndex[selectorID] = [_val];
+  resetAllSetting();
+  var LBD = LoadCSVData( colorHeatMapSet2);
+  barChartData=processOD(LBD.temp_OD);
+  barChartData[""]={};
+  newMarkerArray = processMarker(LBD.nodeNameArray,LBD.nodeNameXY,LBD.enter_Number,LBD.exit_Number);
+  initLine(LBD.newLineArray , map);
+  initMarker(newMarkerArray , map);
+  // initGaugeChart(map);
+}
+
+function MakeSelectorArea(loadIndexArr){
+  var main_ele="<div class='form-row'>";
+  for(sel_ele in loadIndexArr){
+    var ele_str = "<div class='col input-group'><div class='input-group-prepend'>"+
+    "<label class='input-group-text' for='"+sel_ele+"'>"+sel_ele+"</label></div>"+
+    "<select id='"+sel_ele+"' class='form-control' onchange=\"callFilterData('"+sel_ele+"')\">";
+    loadIndexArr[sel_ele].map((_val)=>{
+      ele_str+="<option value='"+_val+"'>"+_val+"</option>";
+    });
+    ele_str+="</select></div>";
+    main_ele+=ele_str;
+  }
+  main_ele+="</div>";
+  d3.select("#mainType").html(main_ele);
+}
+
+function PreCSVDaInit(index_diff, color4LineSet){
+  indexDiff = index_diff;
+  // log first record 
+  var fisrtRecord = tempArrayData[0];
+  // inin loadIndexArr
+  index_diff.map((_index)=>{
+    loadIndexArr[_index]=["all"];
+    loadDataIndex[_index]=["all"];
+  });
+  for (_index in fisrtRecord) {
+    if (fisrtRecord.hasOwnProperty(_index)) {  
+      if(index_diff.indexOf(_index)>-1){
+        loadIndexArr[_index].push(fisrtRecord[_index])
+      }
+    }
+  }
+  tempArrayData.map((_line,i)=> {
+    for (_index in loadIndexArr) {
+      if(loadIndexArr[_index].indexOf(_line[_index])==-1){
+        loadIndexArr[_index].push(_line[_index]);
+      }
+    }
+  });
+  MakeSelectorArea(loadIndexArr);
+}
+
+function FilterCheck(_line){
+  var indexkey=true;
+  if(_line['o']!=_line['d']){
+    indexDiff.map((_index)=>{
+      if(! ((loadDataIndex[_index]=="all" || _line[_index]==loadDataIndex[_index]) && indexkey==true)){
+        indexkey = false;
+      }
+    });
+    return indexkey;
+  }else{
+    return false;
+  }
+}
+
+function LoadCSVData(color4LineSet){
   var exit_Number={},
       enter_Number = {};
   var temp_OD = [],
@@ -17,9 +136,8 @@ function LoadCSVData(tempArrayData , color4LineSet){
   var numberOfLineColor = color4LineSet.length;
   var maxLineNumber = 0;
   var minLineNumber = 99999999;
-  tempArrayData.map((_line)=> {
-
-    if(_line.o!=_line.d && _line.ftime=="8"){
+  tempArrayData.map((_line,i)=> {
+    if( FilterCheck(_line)){
       var cnt = parseInt(_line.cnt);
       maxLineNumber = (cnt > maxLineNumber) ? cnt : maxLineNumber;
       minLineNumber = (cnt < minLineNumber) ? cnt : minLineNumber;
@@ -65,7 +183,6 @@ function LoadCSVData(tempArrayData , color4LineSet){
       }
     }
   });
-
   // process of line
   var color_d = Math.round((maxLineNumber-minLineNumber)/numberOfLineColor+1);
   var weight_d = Math.round((maxLineNumber-minLineNumber)/10);
@@ -145,7 +262,7 @@ function processOD(temp_OD){
   return barChartData;
 }
 
-function initGaugeChart(){
+function initGaugeChart(map){
   var rateContents = ["<div id='rateChartTitle' class='rateChart'>Entrance Rate</div>",
                       "<div id='rateChart'></div>"].join('');
 
@@ -243,7 +360,9 @@ function callC3Chart(title){
 function initLine(lineArray,_map){
   L_data=lineArray;
   lineArray.map((_line)=>{
-    drawLineFunc(_line).addTo(_map);
+    var tempL_L = drawLineFunc(_line);
+    Leaflet_Line.push(tempL_L);
+    tempL_L.addTo(_map);
   });
 }
 
@@ -341,10 +460,12 @@ function MarkerHiLightProcee(_map , title){
 }
 
 function initMarker(markerArray , _map){
-  markerArray.map((_marker)=>{
-    drawMarkerFunc(_marker).addTo(_map).on('click' ,L.bind(HiLightFunc, null, _map , _marker['noName']));
-  });
   M_data=markerArray;
+  markerArray.map((_marker)=>{
+    var tempL_M = drawMarkerFunc(_marker)
+    Leaflet_Marker.push(tempL_M);
+    tempL_M.addTo(_map).on('click' ,L.bind(HiLightFunc, null, _map , _marker['noName']));
+  });
 }
 
 
@@ -368,25 +489,4 @@ function drawMarkerFunc(_marker){
     weight:'1'})
 	tmp_marker.bindPopup(popupHTML);
 	return tmp_marker;
-}
-
-
-
-function old_drawCircleMarker(_x,_y,_radius=3,_fillColor='green',tip='this is a tip'){
-  _radius=_radius*mapZoomLevel
-  tmp_marker = L.circleMarker([_x,_y],{
-    radius:_radius,
-    fillColor: _fillColor,
-    color:'#666666',
-    weight:'0'})
-  tmp_marker.bindTooltip(tip)
-  return tmp_marker
-}
-
-
-function old_drawOneline(x1,y1,x2,y2,_color='#000',_weight=2){
-  pathMK = L.curve(['M',[x1,y1],
-            'Q',[x1,y2],
-                [x2,y2]],{color:_color,weight:_weight})
-  return pathMK
 }
