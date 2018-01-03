@@ -275,32 +275,32 @@ function initGaugeChart(map){
   dialog.setSize([ 280, 180]);
   dialog.hideClose();
   RateChart = c3.generate({
-    bindto: '#rateChart',
-    data: {
-        columns: [
-            ['data', 50.0]
-        ],
-        type: 'gauge',
-    },
-    gauge: {
-       label: {
-           format: function(value, ratio) {
-               return value;
-           },
-       },
-   units: '%',
-   width: 50
-    },
-    color: {
-        pattern: ['#FF0000', '#F97600', '#F6C600', '#60B044'], // the three color levels for the percentage values.
-        threshold: {
-            values: [30, 60, 90, 100]
-        }
-    },
-    size: {
-        height: 120,
-    }
-});
+      bindto: '#rateChart',
+      data: {
+          columns: [
+              ['data', 50.0]
+          ],
+          type: 'gauge',
+      },
+      gauge: {
+         label: {
+             format: function(value, ratio) {
+                 return value;
+             },
+         },
+     units: '%',
+     width: 50
+      },
+      color: {
+          pattern: ['#FF0000', '#F97600', '#F6C600', '#60B044'], // the three color levels for the percentage values.
+          threshold: {
+              values: [30, 60, 90, 100]
+          }
+      },
+      size: {
+          height: 120,
+      }
+  });
 }
 
 function ChangeGaugeChart(_Marker){

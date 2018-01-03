@@ -20,6 +20,7 @@ function arr_diff (a1, a2) {
 
 // load dataset and create table
 function load_dataset(csv) {
+  resetAllSetting();
   tempArrayData=d3.csv.parse(csv);
   var csvKey = Object.keys(tempArrayData[0]);
   if(csvKey.includes('x1') && csvKey.includes('y1') && csvKey.includes('x2') && csvKey.includes('y2') && csvKey.includes('o') && csvKey.includes('d') && csvKey.includes('cnt')){
@@ -38,7 +39,6 @@ function preLoadProcess(index_diff){
     newMarkerArray = processMarker(LBD.nodeNameArray,LBD.nodeNameXY,LBD.enter_Number,LBD.exit_Number);
     initLine(LBD.newLineArray , map);
     initMarker(newMarkerArray , map);
-    initGaugeChart(map);
 }
 
 
