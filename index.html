@@ -2,6 +2,7 @@
 <head>
 <meta charset="utf-8">
 <title>Taipei OD Table - Demo </title>
+<script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script>
 <link rel="stylesheet" href="css/leaflet.css" />
 <!-- <link rel="stylesheet" href="css/bootstrap.min.css" /> -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
@@ -24,10 +25,12 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 <link href="css/c3.min.css" rel="stylesheet">
 <link href="css/main.css" rel="stylesheet">
+<link href="dist/leaflet.fullscreen.css" rel="stylesheet">
 <link href="css/Leaflet.Dialog.css" rel="stylesheet">
 
 <!-- Load d3.js and c3.js -->
 <script src="js/c3.min.js"></script>
+<script src="dist/Leaflet.fullscreen.min.js"></script>
 
 <script src="js/preProcess.js"></script>
 <script src="js/upload.js"></script>
@@ -57,20 +60,21 @@
 
 upload_button("uploader", load_dataset);
 
-var map = L.map('map').setView([25.03241, 121.523208], 11);
+var map = L.map('map').setView([25.07, 121.523208], 11);
+var FullS=new L.Control.Fullscreen();
+FullS.setPosition('bottomright');
+map.addControl(FullS);
 var mapZoomLevel = map.getZoom();
+map.zoomControl.setPosition('bottomright');
 L.tileLayer('http://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',apikey:'c4377a218be242ddb3297260d216b11b'}).addTo(map);
 
 // read csv data 
 initGaugeChart(map);
-
-
+initLineLevel(map);
 var colorBlackSet = ['#D3D3D3','#C0C0C0','#A9A9A9','#778899','#708090','#808080','#696969','#000000'];
 var colorGreenSet = ['#ADFF2F','#7CFC00','#7FFF00','#00FF00','#32CD32','#9ACD32','#8FBC8F','#3CB371','#66CDAA','#20B2AA','#008080','#2E8B57','#228B22','#006400','#808000','#556B2F','#2F4F4F'];
 var colorHeatMapSet = ['#F1F8E9','#DCEDC8','#C5E1A5','#AED581','#FFF59D','#FFF176','#FFEE58','#FF8A65','#FF7043','#FF5722'];
-var colorHeatMapSet2 = ['#AED581','#9CCC65','#8BC33A','#7CB342','#FFEB3B','#FDD835','#FBC02D','#FF8A65','#FF7043','#FF5722'];
-var colorBrown = ['#AAAAAA','#AAAAAA','#AAAAAA','#AAAAAA','#AAAAAA','#AAAAAA','#AAAAAA'];
-
+var colorHeatMapSet2 = ['#7CB342','#8BC33A','#9CCC65','#AED581','#FFEB3B','#FDD835','#FBC02D','#FF8A65','#FF7043','#FF5722'];
 d3.csv("./data.csv", function(data) {
   tempArrayData=data;
   var csvKey = Object.keys(tempArrayData[0]);

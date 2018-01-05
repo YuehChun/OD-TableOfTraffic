@@ -63,11 +63,16 @@ function callFilterData(selectorID){
   loadDataIndex[selectorID] = [_val];
   resetAllSetting();
   var LBD = LoadCSVData( colorHeatMapSet2);
-  barChartData=processOD(LBD.temp_OD);
-  barChartData[""]={};
-  newMarkerArray = processMarker(LBD.nodeNameArray,LBD.nodeNameXY,LBD.enter_Number,LBD.exit_Number);
-  initLine(LBD.newLineArray , map);
-  initMarker(newMarkerArray , map);
+  if(LBD.newLineArray.length>0){
+    barChartData=processOD(LBD.temp_OD);
+    barChartData[""]={};
+    newMarkerArray = processMarker(LBD.nodeNameArray,LBD.nodeNameXY,LBD.enter_Number,LBD.exit_Number);
+    console.log(newMarkerArray);
+    initLine(LBD.newLineArray , map);
+    initMarker(newMarkerArray , map);
+  }else{
+    alert("Error selector");
+  }
   // initGaugeChart(map);
 }
 
@@ -139,8 +144,6 @@ function LoadCSVData(color4LineSet){
   tempArrayData.map((_line,i)=> {
     if( FilterCheck(_line)){
       var cnt = parseInt(_line.cnt);
-      maxLineNumber = (cnt > maxLineNumber) ? cnt : maxLineNumber;
-      minLineNumber = (cnt < minLineNumber) ? cnt : minLineNumber;
       if (!(_line.o in exit_Number)){
         exit_Number[_line.o]=cnt;
       }else{
@@ -154,46 +157,85 @@ function LoadCSVData(color4LineSet){
       }
       if (nodeNameArray.indexOf(_line.o)==-1){
         nodeNameArray.push(_line.o);
-        nodeNameXY[_line.o] = {x: _line.x1,y: _line.y1};
+        nodeNameXY[_line.o] = {x: _line.x1, y: _line.y1};
       }
       if (nodeNameArray.indexOf(_line.d)==-1){
         nodeNameArray.push(_line.d);
-        nodeNameXY[_line.d] = {x: _line.x2,y: _line.y2};
+        nodeNameXY[_line.d] = {x: _line.x2, y: _line.y2};
       }
       if (!(_line.o in temp_OD)){
-          temp_OD[_line.o]=[]
-          temp_OD[_line.o][_line.d]=[]
-          temp_OD[_line.o][_line.d]['exit']=parseInt(_line.cnt)
+          temp_OD[_line.o]=[];
+          temp_OD[_line.o][_line.d]=[];
+          temp_OD[_line.o][_line.d]['exit']=cnt;
       }else if (!(_line.d in temp_OD[_line.o])){
-          temp_OD[_line.o][_line.d]=[]
-          temp_OD[_line.o][_line.d]['exit']=parseInt(_line.cnt)
+          temp_OD[_line.o][_line.d]=[];
+          temp_OD[_line.o][_line.d]['exit']=cnt;
+      }else if (temp_OD[_line.d][_line.o]['enter']>0){
+          temp_OD[_line.o][_line.d]['exit']+=cnt;
       }else{
-          temp_OD[_line.o][_line.d]['exit']=parseInt(_line.cnt)
+          temp_OD[_line.o][_line.d]['exit']=cnt;
       }
 
       if (!(_line.d in temp_OD)){
           temp_OD[_line.d]=[]
-          temp_OD[_line.d][_line.o]=[]
-          temp_OD[_line.d][_line.o]['enter']=parseInt(_line.cnt)
+          temp_OD[_line.d][_line.o]=[];
+          temp_OD[_line.d][_line.o]['enter']=cnt;
       }else if (!(_line.o in temp_OD[_line.d])){
-          temp_OD[_line.d][_line.o]=[]
-          temp_OD[_line.d][_line.o]['enter']=parseInt(_line.cnt)
+          temp_OD[_line.d][_line.o]=[];
+          temp_OD[_line.d][_line.o]['enter']=cnt;
+      }else if (temp_OD[_line.d][_line.o]['enter']>0){
+          temp_OD[_line.d][_line.o]['enter']+=cnt;
       }else{
-          temp_OD[_line.d][_line.o]['enter']=parseInt(_line.cnt)
+          temp_OD[_line.d][_line.o]['enter']=cnt;
       }
     }
   });
-  // process of line
-  var color_d = Math.round((maxLineNumber-minLineNumber)/numberOfLineColor+1);
-  var weight_d = Math.round((maxLineNumber-minLineNumber)/10);
-  tempArrayData.map((_line)=> {
-    var colorIndex = ((_line.cnt-minLineNumber)-((_line.cnt-minLineNumber)%color_d))/color_d
-    var weightIndex = ((_line.cnt-minLineNumber)-((_line.cnt-minLineNumber)%weight_d))/weight_d
-    weightIndex = _line.cnt == 0 ? 0 : weightIndex;
-    if(weightIndex>0){
-      newLineArray.push({o:_line.o,d:_line.d,x1:_line.x1,y1:_line.y1,x2:_line.x2,y2:_line.y2,cnt:_line.cnt,color:color4LineSet[colorIndex],weight:weightIndex});
+
+  for (_O in temp_OD){
+    for (_D in temp_OD[_O]){
+      var tempMax = 0;
+      var tempMin = 99999999;
+      if ('enter' in temp_OD[_O][_D] && 'exit' in temp_OD[_O][_D]){
+        if(temp_OD[_O][_D]['enter'] > temp_OD[_O][_D]['exit']){
+          tempMax=temp_OD[_O][_D]['enter'];
+          tempMin=temp_OD[_O][_D]['exit'];
+        }else{
+          tempMax=temp_OD[_O][_D]['exit'];
+          tempMin=temp_OD[_O][_D]['enter'];
+        }
+      }else if('enter' in temp_OD[_O][_D]){
+        tempMax=temp_OD[_O][_D]['enter'];
+        tempMin=temp_OD[_O][_D]['enter'];
+      }else if('exit' in temp_OD[_O][_D]){
+        tempMax=temp_OD[_O][_D]['exit'];
+        tempMin=temp_OD[_O][_D]['exit'];
+      }
+      maxLineNumber = (tempMax > maxLineNumber) ? tempMax : maxLineNumber;
+      minLineNumber = (tempMin < minLineNumber) ? tempMin : minLineNumber;
     }
-  });
+  }
+  // process of line
+  if(maxLineNumber>minLineNumber){
+    var color_d = Math.floor((maxLineNumber-minLineNumber)/numberOfLineColor);
+    CreateLineColorRange(color_d,color4LineSet)
+    var weight_d = Math.floor((maxLineNumber-minLineNumber)/10);
+    tempArrayData.map((_line)=> {
+      if(_line.o!=_line.d){
+        var cnt = temp_OD[_line.o][_line.d]['exit'];
+        var colorIndex = ((cnt-minLineNumber)-((cnt-minLineNumber)%color_d))/color_d-1;
+        if(colorIndex<0 && cnt>0){
+          colorIndex=0;
+        }
+        var weightIndex = ((cnt-minLineNumber)-((cnt-minLineNumber)%weight_d))/weight_d;
+        weightIndex = cnt == 0 ? 0 : weightIndex;
+        if(weightIndex>0){
+          newLineArray.push({o:_line.o,d:_line.d,x1:_line.x1,y1:_line.y1,x2:_line.x2,y2:_line.y2,cnt:cnt,color:color4LineSet[colorIndex],weight:weightIndex});
+        }
+      }
+    });
+  }
+  console.log(enter_Number);
+  console.log(exit_Number);
   return ({
     'newLineArray': newLineArray,
     'temp_OD': temp_OD,
@@ -202,10 +244,10 @@ function LoadCSVData(color4LineSet){
     'enter_Number': enter_Number,
     'exit_Number': exit_Number,
   });
-  }
+}
+
+
 function processMarker(nodeNameArray,nodeNameXY,enter_Number,exit_Number){
-  // console.log(nodeNameXY);
-  // process of marker 
   var maxNodeNumber = 0;
   var minNodeNumber = 99999999;
   var tempTotal_Node = [];
@@ -262,15 +304,39 @@ function processOD(temp_OD){
   return barChartData;
 }
 
+function initLineLevel(map){
+  var LineContents = ["<div id='colorRange'>",
+                      "<div class='lineRangeList'><div class='lineRangeColor' style='background-color:#AED581;'></div><code>1 - 72</code></div><div class='lineRangeList'><div class='lineRangeColor' style='background-color:#9CCC65;'></div><code>73 - 144</code></div><div class='lineRangeList'><div class='lineRangeColor' style='background-color:#8BC33A;'></div><code>145 - 216</code></div><div class='lineRangeList'><div class='lineRangeColor' style='background-color:#7CB342;'></div><code>217 - 288</code></div><div class='lineRangeList'><div class='lineRangeColor' style='background-color:#FFEB3B;'></div><code>289 - 360</code></div><div class='lineRangeList'><div class='lineRangeColor' style='background-color:#FDD835;'></div><code>361 - 432</code></div><div class='lineRangeList'><div class='lineRangeColor' style='background-color:#FBC02D;'></div><code>433 - 504</code></div><div class='lineRangeList'><div class='lineRangeColor' style='background-color:#FF8A65;'></div><code>505 - 576</code></div><div class='lineRangeList'><div class='lineRangeColor' style='background-color:#FF7043;'></div><code>577 - 648</code></div><div class='lineRangeList'><div class='lineRangeColor' style='background-color:#FF5722;'></div><code>649 - 720</code></div>",
+                      "</div>"].join('');
+  var dialog4line = L.control.dialog()
+            .setContent(LineContents)
+            .addTo(map);
+
+  dialog4line.setLocation([0, 0]);
+  dialog4line.freeze();
+  dialog4line.setSize([ 200, 330]);
+  dialog4line.hideClose();
+}
+function CreateLineColorRange(color_duration,color4LineSet){
+  var colorRangeHtml = "";
+  var pre_max = 0;
+  color4LineSet.map((_color,i)=>{
+    var st = pre_max+1;
+    var ed = st+color_duration;
+    pre_max = ed;
+    colorRangeHtml+="<div class='lineRangeList'><div class='lineRangeColor' style='background-color:"+_color+";'></div><code>"+st+" - "+ed+"</code></div>";
+  });
+  d3.select('#colorRange').html(colorRangeHtml);
+}
+
 function initGaugeChart(map){
   var rateContents = ["<div id='rateChartTitle' class='rateChart'>Entrance Rate</div>",
                       "<div id='rateChart'></div>"].join('');
-
-  var dialog = L.control.dialog()
+  var dialog = L.control.dialog({position:'topright'})
             .setContent(rateContents)
             .addTo(map);
 
-  dialog.setLocation([290, 5]);
+  dialog.setLocation([0, -290]);
   dialog.freeze();
   dialog.setSize([ 280, 180]);
   dialog.hideClose();
@@ -439,6 +505,7 @@ function MarkerHiLightProcess(_marker){
 function HiLightFunc(_map,  title){
   LineHiLightProcess(_map, title);
   var HiMarker = MarkerHiLightProcee(_map , title);
+  console.log(HiMarker)
   callC3Chart(title);
   ChangeGaugeChart(HiMarker);
 }

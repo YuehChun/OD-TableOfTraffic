@@ -23,6 +23,7 @@ function load_dataset(csv) {
   resetAllSetting();
   tempArrayData=d3.csv.parse(csv);
   var csvKey = Object.keys(tempArrayData[0]);
+
   if(csvKey.includes('x1') && csvKey.includes('y1') && csvKey.includes('x2') && csvKey.includes('y2') && csvKey.includes('o') && csvKey.includes('d') && csvKey.includes('cnt')){
     var index_diff = arr_diff(csvKey,['x1','y1','x2','y2','o','d','cnt']);
     preLoadProcess(index_diff);
@@ -32,13 +33,17 @@ function load_dataset(csv) {
 }
 
 function preLoadProcess(index_diff){
-  PreCSVDaInit( index_diff, colorHeatMapSet2);
+    PreCSVDaInit( index_diff, colorHeatMapSet2);
     var LBD = LoadCSVData( colorHeatMapSet2);
-    barChartData=processOD(LBD.temp_OD);
-    barChartData[""]={};
-    newMarkerArray = processMarker(LBD.nodeNameArray,LBD.nodeNameXY,LBD.enter_Number,LBD.exit_Number);
-    initLine(LBD.newLineArray , map);
-    initMarker(newMarkerArray , map);
+    if(LBD.newLineArray.length>0){
+      barChartData=processOD(LBD.temp_OD);
+      barChartData[""]={};
+      newMarkerArray = processMarker(LBD.nodeNameArray,LBD.nodeNameXY,LBD.enter_Number,LBD.exit_Number);
+      initLine(LBD.newLineArray , map);
+      initMarker(newMarkerArray , map);
+    }else{
+      alert("Error selector");
+    }
 }
 
 
