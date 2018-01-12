@@ -314,7 +314,7 @@ function initLineLevel(map){
 
   dialog4line.setLocation([0, 0]);
   dialog4line.freeze();
-  dialog4line.setSize([ 200, 330]);
+  dialog4line.setSize([ 200, 340]);
   dialog4line.hideClose();
 }
 function CreateLineColorRange(color_duration,color4LineSet){
