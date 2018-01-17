@@ -34,7 +34,7 @@ function load_dataset(csv) {
 
 function preLoadProcess(index_diff){
     PreCSVDaInit( index_diff, colorHeatMapSet2);
-    var LBD = LoadCSVData( colorHeatMapSet2);
+    var LBD = LoadCSVData(colorHeatMapSet2);
     if(LBD.newLineArray.length>0){
       barChartData=processOD(LBD.temp_OD);
       barChartData[""]={};

@@ -22,7 +22,8 @@ var Leaflet_Line = [],
 
 var indexDiff=[],
     loadIndexArr=[],
-    loadDataIndex=[];
+    loadDataIndex=[],
+    subArrayData=[];
 
 function resetAllSetting(){
   hiLightTitle = "";
@@ -40,6 +41,7 @@ function resetAllSetting(){
   RateChart.load({
         columns: [['data', 50.0]]
   });
+  d3.select('#chart').html("請選擇一個行政區");
 }
 
 function removeAllMapElement(){
@@ -62,18 +64,16 @@ function callFilterData(selectorID){
   var _val = sel.options[sel.selectedIndex].value;
   loadDataIndex[selectorID] = [_val];
   resetAllSetting();
-  var LBD = LoadCSVData( colorHeatMapSet2);
+  var LBD = LoadCSVData(colorHeatMapSet2);
   if(LBD.newLineArray.length>0){
     barChartData=processOD(LBD.temp_OD);
     barChartData[""]={};
     newMarkerArray = processMarker(LBD.nodeNameArray,LBD.nodeNameXY,LBD.enter_Number,LBD.exit_Number);
-    console.log(newMarkerArray);
     initLine(LBD.newLineArray , map);
     initMarker(newMarkerArray , map);
   }else{
     alert("Error selector");
   }
-  // initGaugeChart(map);
 }
 
 function MakeSelectorArea(loadIndexArr){
@@ -97,6 +97,7 @@ function PreCSVDaInit(index_diff, color4LineSet){
   // log first record 
   var fisrtRecord = tempArrayData[0];
   // inin loadIndexArr
+  loadIndexArr=[];
   index_diff.map((_index)=>{
     loadIndexArr[_index]=["all"];
     loadDataIndex[_index]=["all"];
@@ -141,8 +142,10 @@ function LoadCSVData(color4LineSet){
   var numberOfLineColor = color4LineSet.length;
   var maxLineNumber = 0;
   var minLineNumber = 99999999;
+  subArrayData = [];
   tempArrayData.map((_line,i)=> {
     if( FilterCheck(_line)){
+      subArrayData.push(_line);
       var cnt = parseInt(_line.cnt);
       if (!(_line.o in exit_Number)){
         exit_Number[_line.o]=cnt;
@@ -216,16 +219,14 @@ function LoadCSVData(color4LineSet){
   }
   // process of line
   if(maxLineNumber>minLineNumber){
-    var color_d = Math.floor((maxLineNumber-minLineNumber)/numberOfLineColor);
-    CreateLineColorRange(color_d,color4LineSet)
+    var color_d = Math.ceil((maxLineNumber-minLineNumber)/numberOfLineColor);
+    CreateLineColorRange(color_d,color4LineSet);
     var weight_d = Math.floor((maxLineNumber-minLineNumber)/10);
-    tempArrayData.map((_line)=> {
+    subArrayData.map((_line)=> {
       if(_line.o!=_line.d){
         var cnt = temp_OD[_line.o][_line.d]['exit'];
-        var colorIndex = ((cnt-minLineNumber)-((cnt-minLineNumber)%color_d))/color_d-1;
-        if(colorIndex<0 && cnt>0){
-          colorIndex=0;
-        }
+        var colorIndex = ((cnt-minLineNumber)-((cnt-minLineNumber)%color_d))/color_d;
+        colorIndex = colorIndex<0 && cnt>0 ? 0 : colorIndex;
         var weightIndex = ((cnt-minLineNumber)-((cnt-minLineNumber)%weight_d))/weight_d;
         weightIndex = cnt == 0 ? 0 : weightIndex;
         if(weightIndex>0){
@@ -234,8 +235,6 @@ function LoadCSVData(color4LineSet){
       }
     });
   }
-  console.log(enter_Number);
-  console.log(exit_Number);
   return ({
     'newLineArray': newLineArray,
     'temp_OD': temp_OD,
@@ -266,9 +265,9 @@ function processMarker(nodeNameArray,nodeNameXY,enter_Number,exit_Number){
       maxNodeNumber = (totalN > maxNodeNumber) ? totalN : maxNodeNumber;
       minNodeNumber = (totalN < minNodeNumber) ? totalN : minNodeNumber;
   });
-  var weight_n = Math.round((maxNodeNumber-minNodeNumber)/50);
+  var weight_n = Math.ceil((maxNodeNumber-minNodeNumber)/50);
   tempTotal_Node.map((_node) => {
-    var radiusIndex = ((_node.total-minNodeNumber)-((_node.total-minNodeNumber)%weight_n))/weight_n
+    var radiusIndex = ((_node.total-minNodeNumber)-((_node.total-minNodeNumber)%weight_n))/weight_n;
     radiusIndex = _node.total==0 ? 0 : radiusIndex;
     if(radiusIndex>0){
       newMarkerArray.push({
@@ -283,10 +282,6 @@ function processMarker(nodeNameArray,nodeNameXY,enter_Number,exit_Number){
       });
     }
   });
-  // return ({
-  //   'tempTotal_Node' : tempTotal_Node,
-  //   'newMarkerArray' : newMarkerArray
-  // });  
   return newMarkerArray;
 }
 
@@ -296,8 +291,10 @@ function processOD(temp_OD){
     barChartData[_oneNode]=[];
     for (var _twoNode in temp_OD[_oneNode]){
       if (temp_OD[_oneNode][_twoNode]['exit']>0 || temp_OD[_oneNode][_twoNode]['enter']>0){
-        var ctotalNum = temp_OD[_oneNode][_twoNode]['exit']+temp_OD[_oneNode][_twoNode]['enter']
-        barChartData[_oneNode].push({zone : _twoNode , exit : temp_OD[_oneNode][_twoNode]['exit'] , enter : temp_OD[_oneNode][_twoNode]['enter'], totalN : ctotalNum})
+        var _enter = temp_OD[_oneNode][_twoNode]['enter'] >= 0 ? temp_OD[_oneNode][_twoNode]['enter'] : 0 ;
+        var _exit = temp_OD[_oneNode][_twoNode]['exit'] >= 0 ? temp_OD[_oneNode][_twoNode]['exit'] : 0 ;
+        var ctotalNum = _enter+_exit;
+        barChartData[_oneNode].push({zone : _twoNode , exit : _exit , enter : _enter , totalN : ctotalNum})
       }
     }
   }
@@ -389,8 +386,10 @@ function callC3Chart(title){
   if(hiLightTitle!=""){
     barChartData[hiLightTitle].map((_data)=>{
       x.push(_data['zone']);
-      enter.push(_data['enter']);
-      exit.push(_data['exit']);
+      var _enter = _data['enter'] >= 0 ? _data['enter'] : 0 ;
+      var _exit = _data['exit'] >= 0 ? _data['exit'] : 0 ;
+      enter.push(_enter);
+      exit.push(_exit);
     });
     var _columns = [enter,exit];
     c3.generate({
@@ -505,7 +504,6 @@ function MarkerHiLightProcess(_marker){
 function HiLightFunc(_map,  title){
   LineHiLightProcess(_map, title);
   var HiMarker = MarkerHiLightProcee(_map , title);
-  console.log(HiMarker)
   callC3Chart(title);
   ChangeGaugeChart(HiMarker);
 }
