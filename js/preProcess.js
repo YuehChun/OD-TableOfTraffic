@@ -492,7 +492,7 @@ function MarkerHiLightProcess(_marker){
   var tmp_marker = L.circleMarker([_marker['y'],_marker['x']],{
     title: _marker['noName'],
     radius: _marker['radius'],
-    fillColor: "#708090",
+    fillColor: "#333",
     fillOpacity: '0.9',
     opacity: '0.3' ,
     color:'#333',
@@ -538,7 +538,7 @@ function drawMarkerFunc(_marker){
   var _x = _marker['x'],
       _y = _marker['y'],
       _radius = _marker['radius'],
-      _fillColor= "#ccc",
+      _fillColor= "#333",
       _enter= _marker['enter'],
       _exit= _marker['exit'],
       _total= _marker['total'];
@@ -548,8 +548,8 @@ function drawMarkerFunc(_marker){
     title: _marker['noName'],
 		radius:_radius,
     fillColor: _fillColor,
-    fillOpacity: '0.4',
-    opacity: '0.3' ,
+    fillOpacity: '0.6',
+    opacity: '0.6' ,
 		color:'#333',
     weight:'1'})
 	tmp_marker.bindPopup(popupHTML);
