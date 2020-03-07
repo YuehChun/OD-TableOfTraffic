@@ -1,7 +1,7 @@
 # OD Table in Traffic Visualization(視覺化起訖旅次表)
 > This is an application for Origin Destination Table Visualization in Traffic. Base on JavaScript. 
 
-![Demo snapshot](/images/snapshot.png)
+![Demo snapshot](/ODTableOfTraffic.gif)
 
 
 Demo for taipei traffic (Case by using Xinyi Road at 7 am ~ 9 am ). 
